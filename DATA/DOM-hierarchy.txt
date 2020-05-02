@@ -1,0 +1,19 @@
+body
+  div class="maincontent"
+    div class="main"
+      div id="calarea"
+        div class="divBox1"
+          div id="ShukuList"
+            <h2 id="syukujitsu">2000年（平成12年）の祝日</h2>
+            <div class="SH_dt">2000年1月1日</div> -- repeat 3 line sets (date, name, closing tag pair)
+            <div class="SH_str">元日</div>
+            <div class="SH_c"></div>
+            <div class="SH_dt">2000年1月10日</div>
+            <div class="SH_str">成人の日</div>
+            <div class="SH_c"></div>
+            ...
+
+strategy for ananysis
+Step 1: getElementById("ShukuList") retrives <div id="ShukuList"> element as var shukuList.
+Step 2: shukuList.getElementsByClassName("SH_dt") retrieves <div class="SH_dt"> elements as var shukuDateList[].
+Step 3: for (date in shukuDateList) { parse date }
