@@ -1,0 +1,31 @@
+Profile:
+https://www.quandl.com/account/profile
+
+Help:
+https://help.quandl.com/
+
+Sample date:
+https://www.quandl.com/data/TSE/2181-Persol-Holdings-Co-Ltd-2181
+
+Sample query
+https://www.quandl.com/api/v3/datasets/TSE/2181.csv?api_key=-yidvxe1XqCkT8wu1yvv
+
+password: 7890pOiU&
+
+API key: -yidvxe1XqCkT8wu1yvv
+
+Focused items
+ユーシン精機
+https://www.quandl.com/api/v3/datasets/TSE/6482.csv?api_key=-yidvxe1XqCkT8wu1yvv
+オカダアイヨン
+https://www.quandl.com/api/v3/datasets/TSE/6294.csv?api_key=-yidvxe1XqCkT8wu1yvv
+コニカミノルタ
+https://www.quandl.com/api/v3/datasets/TSE/4902.csv?api_key=-yidvxe1XqCkT8wu1yvv
+ヤマタネ
+https://www.quandl.com/api/v3/datasets/TSE/9305.csv?api_key=-yidvxe1XqCkT8wu1yvv
+フィックスターズ
+https://www.quandl.com/api/v3/datasets/TSE/3687.csv?api_key=-yidvxe1XqCkT8wu1yvv
+駅探
+https://www.quandl.com/api/v3/datasets/TSE/3646.csv?api_key=-yidvxe1XqCkT8wu1yvv
+ワコム
+https://www.quandl.com/api/v3/datasets/TSE/6727.csv?api_key=-yidvxe1XqCkT8wu1yvv

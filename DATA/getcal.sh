@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 base_url="http://www.benri.com/calendar/"
 common_extension=".html"
 

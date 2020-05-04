@@ -1,8 +1,9 @@
-const mymod = {
+const JPHolidayTools = {
     mod_jsdom : mod_jsdom = require("jsdom"),
     mod_fs : mod_fs = require("fs"),
     mod_path : mod_path = require("path"),
-        /*!
+
+    /*!
     \brief make the path of DATA subfolder.
     \param scriptPath [in] js main script path in process.argv[1].
     \param childDir [in] directory path relative to the directory of scriptPath.
@@ -13,6 +14,28 @@ const mymod = {
         return mod_path.join(
             mod_path.dirname(scriptPath),
             "DATA");
+    },
+
+    isDigit : function isDigit(c)
+    {
+        return ('0' <= c && c <= '9');
+    },
+
+    /*!
+    \brief return true only when str is decimal four digits.
+    */
+    isFullYear : function isFullYear(s)
+    {
+        var b = true;
+        if (s.length != 4)
+        {
+            return false;
+        }
+        for (var i = 0; i != 4; i++)
+        {
+            b = b && JPHolidayTools.isDigit(s[i]);
+        }
+        return b;
     },
 
     /*!
@@ -27,7 +50,9 @@ const mymod = {
         for (var i in children)
         {
             var fname = children[i];
-            if (mod_path.extname(fname) == ".html")
+            var extension = mod_path.extname(fname);
+            var base = mod_path.basename(fname, ".html");
+            if ((extension == ".html") && JPHolidayTools.isFullYear(base))
             {
                 paths.push(mod_path.join(dataDirPath, fname));
             }
@@ -57,11 +82,6 @@ const mymod = {
         {
             throw exc_retrieveDates;
         }
-    },
-
-    isDigit : function isDigit(c)
-    {
-        return ('0' <= c && c <= '9');
     },
 
     parseJPDate : function parseJPDate(datestring)
@@ -127,14 +147,14 @@ module.exports = {
     \breif get a list of calendar file paths in DATA subfolder.
     \return array of strings containing the file paths.
     */
-    getCalendarFilePaths : mymod.getCalendarFilePaths,
+    getCalendarFilePaths : JPHolidayTools.getCalendarFilePaths,
 
     /*!
     \brief retrieve dates in each calendar file.
     \param calendar [in] file path to calendar html file
     \return array of dates of national holidays in each calendar.
     */
-    retrieveDateStrings : mymod.retrieveDateStrings,
+    retrieveDateStrings : JPHolidayTools.retrieveDateStrings,
 
     /*!
     \brief get the project DATA subfolder converted from the script path
@@ -142,21 +162,21 @@ module.exports = {
     \param scriptPath [in] is retrieved by process.args[1].
     \return the project data directory path
     */
-    makeDirPath : mymod.makeDirPath,
+    makeDirPath : JPHolidayTools.makeDirPath,
 
     /*!
     \brief check if the character is one of decimal digits, i.e. '0'..'9'
     \param c [in] a character
     */
-    isDigit : mymod.isDigit,
+    isDigit : JPHolidayTools.isDigit,
 
     /*!
     \brief parse a date string formated in Japanese style like 2010年8月31日
     */
-    parseJPDate : mymod.parseJPDate,
+    parseJPDate : JPHolidayTools.parseJPDate,
 
     /*!
     \brief retrieve date objects from the html text specified the file path
     */
-    retrieveDates : mymod.retrieveDates,
+    retrieveDates : JPHolidayTools.retrieveDates,
 };
