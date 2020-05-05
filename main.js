@@ -1,6 +1,6 @@
 const JPHolidayTools = require('./JPHolidayTools');
 const JPXCodeTools = require('./JPXCodeTools');
-
+const YFStockTools = require('./YFStockTools');
 
 // const dataDirPath = JPHolidayTools.makeDirPath(process.argv[1]);
 // const calPaths = JPHolidayTools.getCalendarFilePaths(dataDirPath);
@@ -20,4 +20,6 @@ const JPXCodeTools = require('./JPXCodeTools');
 // console.log(`${dates[0].getFullYear()}-${dates[0].getMonth()+1}-${dates[0].getDate()}`);
 // console.log(dates[0]);
 
-JPXCodeTools.debug_run(process.argv[1]);
+// JPXCodeTools.debug_run(process.argv[1]);
+
+YFStockTools.debug_run();

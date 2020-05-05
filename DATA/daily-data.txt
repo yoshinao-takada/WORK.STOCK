@@ -1,0 +1,21 @@
+1日のレコード数約4000
+1年間のレコード数約1,000,000 = 1M records
+項目
+    日付
+    コード(日本証券市場コード＋主要株価指数)
+    終値
+    始値
+    高値
+    安値
+    出来高
+
+通常の証券コードと株価指数のコードを別のテーブルに保存
+
+[通常の証券コード、YF-index]
+hostname: stocks.finance.yahoo.co.jp
+path: /stocks/detail/
+param: ?code=<code>
+
+[YF-intl-index]
+hostname: finance.yahoo.co.jp
+path: /quote/<code>

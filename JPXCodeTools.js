@@ -3,7 +3,6 @@ const JPXCodeTools = {
     mod_fs : mod_fs = require("fs"),
     mod_path : mod_path = require("path"),
     mod_https : mod_https = require("https"),
-    mod_EventEmitter : mod_EventEmitter = require("events"),
     mod_assert : mod_assert = require("assert"),
     resultSavePath : resultSavePath = "DATA/JPXCodes.csv",
 
@@ -12,7 +11,7 @@ const JPXCodeTools = {
         Protocol : "https",
         Domain : "stocks.finance.yahoo.co.jp",
         Path : "/stocks/qi/",
-        BaseURL :   BaseURL = "https://stocks.finance.yahoo.co.jp/stocks/qi/",
+        BaseURL :   "https://stocks.finance.yahoo.co.jp/stocks/qi/",
         GyoshuTop : [
             { name : "Suisan", code : "?ids=0050"},
             { name : "Mining", code : "?ids=1050"},
