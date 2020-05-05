@@ -4,11 +4,14 @@ const JPXCodeTools = {
     mod_path : mod_path = require("path"),
     mod_https : mod_https = require("https"),
     mod_EventEmitter : mod_EventEmitter = require("events"),
-    emitter : emitter = new mod_EventEmitter(),
-    gyoshuCodes : gyoshuCodes = new Array(),
+    mod_assert : mod_assert = require("assert"),
+    resultSavePath : resultSavePath = "DATA/JPXCodes.csv",
 
     // yahoo finance web page search keys
     YFKeys : {
+        Protocol : "https",
+        Domain : "stocks.finance.yahoo.co.jp",
+        Path : "/stocks/qi/",
         BaseURL :   BaseURL = "https://stocks.finance.yahoo.co.jp/stocks/qi/",
         GyoshuTop : [
             { name : "Suisan", code : "?ids=0050"},
@@ -50,6 +53,8 @@ const JPXCodeTools = {
         ClassKey_Code   :   ".yjM",
         ClassKey_Name   :   ".yjMt",
     },
+    gyoshuCodes : gyoshuCodes = new Array(),
+    hasMoreData : hasMoreData = new Array(),
 
     /*!
     \param document [in] DOM document
@@ -64,38 +69,74 @@ const JPXCodeTools = {
             return link;
         }
         var linkNode = linkNodes[1].firstChild.nextSibling.nextSibling.nextSibling;
-        var linkNodeText = linkNode.outerHTML;
-        var doubleQuotePos0 = linkNodeText.indexOf('"');
-        var doubleQuotePos1 = linkNodeText.lastIndexOf('"');
-        console.log(linkNodeText.substr(doubleQuotePos0 + 1, doubleQuotePos1 - doubleQuotePos0 - 1));
-    },
-
-    /*!
-    \param document [in] DOM document
-    \return array of { code,name } pair
-    */
-    getCodesAndNames    :   function    getCodesAndNames(document)
-    {
-        tableNodes = document.querySelectorAll(JPXCodeTools.YFKeys.ClassKey_Code);
-        console.log(tableNodes);
+        link = linkNode.href;
+        return link;
     },
 
     getURL : function getURL(index)
     {
-        return JPXCodeTools.YFKeys.BaseURL +
-            JPXCodeTools.YFKeys.GyoshuTop[index].code;
+        return JPXCodeTools.YFKeys.Protocol + "://" + JPXCodeTools.YFKeys.Domain +
+            JPXCodeTools.YFKeys.Path + JPXCodeTools.YFKeys.GyoshuTop[index].code;
+    },
+
+    getURL2 : function GetURL2(relpath)
+    {
+        return JPXCodeTools.YFKeys.Protocol + "://" + JPXCodeTools.YFKeys.Domain + relpath;
+    },
+
+    noMoreData : function noMoreData()
+    {
+        var hasMoreData_ = false;
+        for (var i = 0; i != JPXCodeTools.hasMoreData.length; i++)
+        {
+            hasMoreData_ = hasMoreData_ || JPXCodeTools.hasMoreData[i];
+        }
+        return !hasMoreData_;
+    },
+
+    saveGyoshuCodes : function saveGyoshuCodes()
+    {
+        console.log(`@saveGyoshuCodes(),savePath=${JPXCodeTools.resultSavePath}`);
+        var csvText = "code,class,name\n";
+        for (var i_gyoshu =0; i_gyoshu != JPXCodeTools.gyoshuCodes.length; i_gyoshu++)
+        {
+            for (var i_sub = 0;i_sub != JPXCodeTools.gyoshuCodes[i_gyoshu].length; i_sub++)
+            {
+                var infoBlock = JPXCodeTools.gyoshuCodes[i_gyoshu][i_sub];
+                for (var i = 0; i != infoBlock.length; i++)
+                {
+                    var info = infoBlock[i];
+                    var rowText = `${info.code},${info.stockExchangeClass},${info.name}\n`;
+                    csvText += rowText;
+                }
+            }
+        }
+        JPXCodeTools.mod_fs.writeFileSync(JPXCodeTools.resultSavePath, csvText, 'utf8');
     },
 
     startGetRequest :   function startGetRequest(url, gyoshuIndex, subIndex)
     {
-        var myopt = { url: url, gyoshu: gyoshuIndex, sub: subIndex, htmlText: '' };
-        console.log(`URL=${url}`);
+        console.log(`url=${url}, gyoshu=${gyoshuIndex}, sub=${subIndex}`);
+        var htmlText = '';
         var req = JPXCodeTools.mod_https.get(url, (res)=>{
-            res.on('data', (d) => { myopt.htmlText += d; });
+            res.setEncoding('utf8'); // これがないと文字化けする。多バイト文字がバッファーの切れ目にかかる時も適切に処理される。
+            res.on('data', (d) => { htmlText += d; });
             res.on('end', ()=> {
-                var savePath = JPXCodeTools.mod_path.join('DATA', ''+myopt.gyoshu+'-'+myopt.sub);
-                console.log(`savePath=${savePath}`);
-                JPXCodeTools.mod_fs.writeFileSync(savePath, myopt.htmlText, 'utf8');
+                var savePath = JPXCodeTools.mod_path.join('DATA', ''+gyoshuIndex+'-'+subIndex);
+                var link = JPXCodeTools.processDocument(htmlText, gyoshuIndex, subIndex);
+                if (link == null)
+                {
+                    JPXCodeTools.hasMoreData[gyoshuIndex] = false;
+                    if (JPXCodeTools.noMoreData())
+                    {
+                        JPXCodeTools.saveGyoshuCodes();
+                    }
+                }
+                else
+                {
+                    var nextURL = JPXCodeTools.getURL2(link);
+                    JPXCodeTools.startGetRequest(nextURL, gyoshuIndex, subIndex+1);
+                }
             });
         });
     },
@@ -109,7 +150,37 @@ const JPXCodeTools = {
     */
     processDocument :   function processDocument(htmlText,gyoshuIndex,subIndex)
     {
-        const { domdocument } = (new this.mod_jsdom(htmlText)).window;
+
+        var domdocument = new JPXCodeTools.mod_jsdom.JSDOM(htmlText).window.document;
+        // retrieve in-page table of stock codes and company names.
+        var tableNode = domdocument.querySelector("table.yjS");
+        var codeNodes = tableNode.querySelectorAll("td.yjM");
+        var stockExchangeClassNodes = tableNode.querySelectorAll("td.yjSt");
+        var companyNameNodes = tableNode.querySelectorAll("strong.yjMt");
+
+        // DEBUG
+        // var savePath = `DATA/DEBUGINFO_${gyoshuIndex}-${subIndex}.txt`;
+        // var retrieveSummary = `code:${codeNodes.length},exclass:${stockExchangeClassNodes.length},company:${companyNameNodes.length}`;
+        // var retrieveSummaryComment = `<!-- ${retrieveSummary} -->`
+        // JPXCodeTools.mod_fs.writeFileSync(savePath, htmlText + retrieveSummaryComment, 'utf8');
+        // console.log(`@processDocument():${savePath},${codeNodes.length},${stockExchangeClassNodes.length},${companyNameNodes.length}`);
+        // END DEBUG
+
+        JPXCodeTools.mod_assert(
+            (codeNodes.length == stockExchangeClassNodes.length) &&
+            (codeNodes.length == companyNameNodes.length)
+        );
+        JPXCodeTools.mod_assert(codeNodes.length > 0);
+        var infoSummary = new Array(codeNodes.length);
+        for (var i = 0; i != codeNodes.length; i++)
+        {
+            infoSummary[i] = {
+                code: codeNodes[i].firstChild.textContent,
+                stockExchangeClass: stockExchangeClassNodes[i].textContent,
+                name: companyNameNodes[i].firstChild.textContent,
+            };
+        }
+        JPXCodeTools.gyoshuCodes[gyoshuIndex][subIndex] = infoSummary;
         return JPXCodeTools.getLink(domdocument);
     },
 
@@ -118,9 +189,12 @@ const JPXCodeTools = {
         var n_gyoshu = JPXCodeTools.YFKeys.GyoshuTop.length;
         var hasMoreData = true;
         // init gyoshuCodes
+        JPXCodeTools.gyoshuCodes = new Array(n_gyoshu);
+        JPXCodeTools.hasMoreData = new Array(n_gyoshu);
         for (var i_gyoshu = 0; i_gyoshu != n_gyoshu; i_gyoshu++)
         {
-            gyoshuCodes[i_gyoshu] = new Array();
+            JPXCodeTools.gyoshuCodes[i_gyoshu] = new Array();
+            JPXCodeTools.hasMoreData[i_gyoshu] = true;
         }
         // process HTML documents
         for (var i_gyoshu = 0; i_gyoshu != n_gyoshu; i_gyoshu++)
