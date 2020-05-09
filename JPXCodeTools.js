@@ -4,6 +4,7 @@ const JPXCodeTools = {
     mod_path : mod_path = require("path"),
     mod_https : mod_https = require("https"),
     mod_assert : mod_assert = require("assert"),
+    mod_of  :   mod_of = require('./ObjFactory'),
     resultSavePath : resultSavePath = "DATA/JPXCodes.csv",
 
     // yahoo finance web page search keys
@@ -96,7 +97,7 @@ const JPXCodeTools = {
     saveGyoshuCodes : function saveGyoshuCodes()
     {
         console.log(`@saveGyoshuCodes(),savePath=${JPXCodeTools.resultSavePath}`);
-        var csvText = "code,class,name\n";
+        var csvText = JPXCodeTools.mod_of.RetrieveHeaderAsCSV(mod_of.CreateCodeRecord()) + '\n';
         for (var i_gyoshu =0; i_gyoshu != JPXCodeTools.gyoshuCodes.length; i_gyoshu++)
         {
             for (var i_sub = 0;i_sub != JPXCodeTools.gyoshuCodes[i_gyoshu].length; i_sub++)
@@ -104,8 +105,7 @@ const JPXCodeTools = {
                 var infoBlock = JPXCodeTools.gyoshuCodes[i_gyoshu][i_sub];
                 for (var i = 0; i != infoBlock.length; i++)
                 {
-                    var info = infoBlock[i];
-                    var rowText = `${info.code},${info.stockExchangeClass},${info.name}\n`;
+                    var rowText = `${JPXCodeTools.mod_of.RetrieveAsCSV(infoBlock[i])}\n`;
                     csvText += rowText;
                 }
             }
@@ -149,7 +149,6 @@ const JPXCodeTools = {
     */
     processDocument :   function processDocument(htmlText,gyoshuIndex,subIndex)
     {
-
         var domdocument = new JPXCodeTools.mod_jsdom.JSDOM(htmlText).window.document;
         // retrieve in-page table of stock codes and company names.
         var tableNode = domdocument.querySelector("table.yjS");
@@ -173,11 +172,11 @@ const JPXCodeTools = {
         var infoSummary = new Array(codeNodes.length);
         for (var i = 0; i != codeNodes.length; i++)
         {
-            infoSummary[i] = {
-                code: codeNodes[i].firstChild.textContent,
-                stockExchangeClass: stockExchangeClassNodes[i].textContent,
-                name: companyNameNodes[i].firstChild.textContent,
-            };
+            infoSummary[i] = JPXCodeTools.mod_of.CreateCodeRecord(
+                codeNodes[i].textContent,
+                companyNameNodes[i].textContent,
+                stockExchangeClassNodes[i].textContent
+            );
         }
         JPXCodeTools.gyoshuCodes[gyoshuIndex][subIndex] = infoSummary;
         return JPXCodeTools.getLink(domdocument);

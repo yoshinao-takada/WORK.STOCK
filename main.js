@@ -20,6 +20,6 @@ const YFStockTools = require('./YFStockTools');
 // console.log(`${dates[0].getFullYear()}-${dates[0].getMonth()+1}-${dates[0].getDate()}`);
 // console.log(dates[0]);
 
-// JPXCodeTools.debug_run(process.argv[1]);
+JPXCodeTools.debug_run(process.argv[1]);
 
-YFStockTools.debug_run();
+//YFStockTools.debug_run();

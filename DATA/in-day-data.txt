@@ -1,0 +1,12 @@
+individual company            market index
+                    \         /  
+                    stockCodes
+
+JP                                      Intl
+URL_JP                                  URL_Intl
+HTML_JP                                 HTML_Intl
+
+                    daily record
+                    dailyValues
+
+JP individual company.csv   JP market index.csv     Intl market index.csv
